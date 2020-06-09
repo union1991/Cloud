@@ -66,10 +66,9 @@ backend app
 # systemctl start haproxy
 ```
 
-
-
 2. web1/2 서버 구축
 네트워크 카드 셋팅 priv1/priv2/nat(패키지 설치용)
+
 httpd 설치
 mariadb client 설치
 wordpress 설치
