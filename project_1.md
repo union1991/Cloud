@@ -1,3 +1,45 @@
+# 과제 1. 웹서비스 환경 구성하기
+
+## 목차.
+
+### 1. 과제 목표 
+(과제로 얻고자 하는 것)
+
+### 2. 과제 내용 
+(구성도)
+
+### 3. 환경 설정 
+(서버 및 툴 정보)
+
+### 4. 과제 절차 
+(스토리지 서버 - > web 서버 -> 데이터 베이스 -> 로드밸런스)
+(nfs -> iscsi -> database 설치 -> http 설치 -> wordpress 설치 -> 로드밸런스)
+
+
+### 5. 추가 정리
+
+
+-----------------
+
+
+### 1. 과제 목표
+
+
+ 본 과제의 목적은 (로드밸런스) - (웹 - 스토리지 - 데이터베이스) 환경을 구성하여 네트워크의 구성을 이해하며, 각각의 서버에 설치되는 패키지를 연동하며 웹 서비스의 본질을 이해하는 것이다.  
+
+
+#### 과제 성취도 평가
+
+1. 구성도를 확인하여 서버를 구성할 수 있는가?
+2. NFS, ISCSI를 이해하고 서버와 클라이언트를 연결시킬 수 있는가?
+3. 각각의 서버에 설치되는 패키지(MariaDB, PHP 7.2 등)를 이해하고 설정 및 연동할 수 있는가?
+4. 웹 서비스를 이해하였는가?
+
+
+
+---
+
+
 1. lb 서버 구축
 네트워크 카드 세팅 nat/priv1 
 ```
@@ -431,7 +473,9 @@ Created symlink from /etc/systemd/system/multi-user.target.wants/target.service 
 
 
 4. database 서버 구축
+
 ```
+iscsi 마운트
 # yum install iscsi*
 Loaded plugins: fastestmirror
 Loading mirror speeds from cached hostfile
@@ -518,7 +562,32 @@ vda             252:0    0   20G  0 disk
 [root@database ~]# iscsiadm -m node -T "iqn.2020-06.com.example:storage" -p 192.168.124.30:3260 -l^C
 [root@database ~]# 
 
+[root@database ~]# pvcreate /dev/sda
+  Physical volume "/dev/sda" successfully created.
+[root@database ~]# vgcreate vg_db /dev/sda
+  Volume group "vg_db" successfully created
+[root@database ~]# lvcreate lv_db -l 100%FREE vg_db
+  Volume group "lv_db" not found
+  Cannot process volume group lv_db
+[root@database ~]# lvcreate -n lv_db -l 100%FREE vg_db
+  Logical volume "lv_db" created.
+[root@database ~]# lsblk
+NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda               8:0    0    5G  0 disk 
+└─vg_db-lv_db   253:2    0    5G  0 lvm  
+sr0              11:0    1  4.5G  0 rom  
+vda             252:0    0   20G  0 disk 
+├─vda1          252:1    0    1G  0 part /boot
+└─vda2          252:2    0   19G  0 part 
+  ├─centos-root 253:0    0   17G  0 lvm  /
+  └─centos-swap 253:1    0    2G  0 lvm  [SWAP]
+[root@database ~]# 
 ```
 
+```
+db 설치
 
 
+
+
+```
