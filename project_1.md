@@ -182,6 +182,15 @@ tmpfs                       184M     0  184M   0% /run/user/0
 mariadb client 설치
 wordpress 설치
 
+
+# yum install wget
+# wget "http://wordpress.org/latest.tar.gz"
+# tar -xvzf latest.tar.gz -C /var/www/html
+# chown -R apache: /var/www/html/wordpress
+
+
+
+
 clone web2
 
 or
@@ -584,10 +593,16 @@ vda             252:0    0   20G  0 disk
 [root@database ~]# 
 ```
 
-```
+
 db 설치
 
-
+```
+# mysql -u root -p
+MariaDB [(none)]> create database wordpress default CHARACTER SET UTF8;
+MariaDB [(none)]> use wordpress;
+MariaDB [(wordpress)]> create user 'wordadmin'@'%' identified by 'toor';  // 
+MariaDB [(none)]> grant all privileges on wordpress.* to wordadmin
+MariaDB [(none)]> flush privileges;   // refresh
 
 
 ```
