@@ -70,7 +70,7 @@
 * selinux
 > * SELinux(Security-Enhanced Linux)는 관리자가 시스템 액세스 권한을 효과적으로 제어할 수 있게 하는 Linux 시스템용 보안 아키텍처이다.
 > * 일반적으로 보안을 중요시하지 않는 테스트 환경에서는 Disable로 설정 후 사용한다.(필자도 해당 기능 사용)
-> * 보안 제품을 도입할 경우, 보안 솔루션과 충돌이 발생하여 해당 기능을 끄는 경우가 다수 
+> * 보안 제품을 도입할 경우, 보안 솔루션과 충돌이 발생하여 해당 기능을 끄는 경우가 다수 있다.
 
 
 |모드|내용|변경방법|
@@ -591,13 +591,18 @@ define( 'DB_HOST', '192.168.124.40' );   // DB 서버 주소 기입
 ```
 
 * 워드프레스 설정시작
+> * 인터넷 주소창에 web1의 주소/wordpress 입력
 ```
-인터넷 주소창 
 http://192.168.123.20/wordpress 
-
-
-
 ```
+
+
+> * 언어 설정창을 통해 사용하고자 하는 언어 선택
+<img src="https://user-images.githubusercontent.com/56064985/84471118-a7131c80-acbf-11ea-8bad-1688027a5013.png" width="90%"></img>
+
+
+> * 페이지 및 계정 설정
+<img src="https://user-images.githubusercontent.com/56064985/84471134-ae3a2a80-acbf-11ea-922c-475045857c14.png" width="90%"></img>
 
 
 #### 6. load balance 서버 설정
