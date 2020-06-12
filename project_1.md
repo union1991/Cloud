@@ -26,9 +26,7 @@
 4. 웹 서비스를 이해하였는가?
 
 
-
 ---
-
 
 
 ### 2. 과제 내용
@@ -67,6 +65,17 @@
 |:---|:---|:---|
 |PHP|7.3 빌드 이상|epel-release 설치|
 |Database|MariaDB 10 빌드 이상|공식 REPO|
+
+
+* selinux
+> * SELinux(Security-Enhanced Linux)는 관리자가 시스템 액세스 권한을 효과적으로 제어할 수 있게 하는 Linux 시스템용 보안 아키텍처이다.
+> * 일반적으로 보안을 중요시하지 않는 테스트 환경에서는 Disable로 설정 후 사용한다.(필자도 해당 기능 사용)
+
+|모드|내용|변경방법|
+|:---|:---|:---|
+|Disable|액세스 제어의 기본 방식인 DAC가 사용되며 고급 보안이 필요 하지 않는 환경에서 사용| - |
+|Permissive|보안 정책 규칙은 강제되지 않고 /var/log/audit에 로그파일로 기록|setenforce 0|
+|Enforce|모든 보안 정책 규칙이 강제|setenforce 1|
 
 ---
 
@@ -113,6 +122,12 @@
 * storage 서버
 > * VirtIO Disk 1(5G) 추가
 > * VirtIO Disk 2(5G) 추가
+
+
+### [SELinux 설정 Disabled]
+# vi /etc/sysconfig/selinux
+
+SELINUX=disabled  // 
 
 ---
 
