@@ -153,35 +153,8 @@ vda             252:0    0   20G  0 disk
   └─centos-swap 253:1    0    2G  0 lvm  [SWAP]
 vdb             252:16   0    5G  0 disk 
 vdc             252:32   0    5G  0 disk 
-
-# fdisk /dev/vdb
-Welcome to fdisk (util-linux 2.23.2).
-
-Changes will remain in memory only, until you decide to write them.
-Be careful before using the write command.
-
-Device does not contain a recognized partition table
-Building a new DOS disklabel with disk identifier 0x8e0a07ff.
-
-Command (m for help): n
-Partition type:
-   p   primary (0 primary, 0 extended, 4 free)
-   e   extended
-Select (default p): p
-Partition number (1-4, default 1): 
-First sector (2048-10485759, default 2048): 
-Using default value 2048
-Last sector, +sectors or +size{K,M,G} (2048-10485759, default 10485759): 
-Using default value 10485759
-Partition 1 of type Linux and of size 5 GiB is set
-
-Command (m for help): w
-The partition table has been altered!
-
-Calling ioctl() to re-read partition table.
-Syncing disks.
-# mkfs.xfs /dev/vdb1
-meta-data=/dev/vdb1              isize=512    agcount=4, agsize=327616 blks
+# mkfs.xfs /dev/vdb
+meta-data=/dev/vdb            isize=512    agcount=4, agsize=327616 blks
          =                       sectsz=512   attr=2, projid32bit=1
          =                       crc=1        finobt=0, sparse=0
 data     =                       bsize=4096   blocks=1310464, imaxpct=25
@@ -194,7 +167,7 @@ realtime =none                   extsz=4096   blocks=0, rtextents=0
 # blkid
 /dev/vda1: UUID="8c180607-f8a5-48c8-96c2-5ea698aa0d71" TYPE="xfs" 
 /dev/vda2: UUID="s3wucg-GL9o-Zpza-cNLe-vMIq-IP12-1Rbu5V" TYPE="LVM2_member" 
-/dev/vdb1: UUID="e1f36be1-debf-4a06-bba7-5d55906a0087" TYPE="xfs" 
+/dev/vdb: UUID="e1f36be1-debf-4a06-bba7-5d55906a0087" TYPE="xfs" 
 /dev/sr0: UUID="2020-04-22-00-54-00-00" LABEL="CentOS 7 x86_64" TYPE="iso9660" PTTYPE="dos" 
 /dev/mapper/centos-root: UUID="83c57337-8973-4f70-9344-e892e0a40b43" TYPE="xfs" 
 /dev/mapper/centos-swap: UUID="01705b68-f5fb-40e3-a98e-47469f951324" TYPE="swap" 
@@ -210,14 +183,19 @@ tmpfs                    919M     0  919M   0% /sys/fs/cgroup
 /dev/mapper/centos-root   17G  1.4G   16G   8% /
 /dev/vda1               1014M  194M  821M  20% /boot
 tmpfs                    184M     0  184M   0% /run/user/0
-/dev/vdb1                5.0G   33M  5.0G   1% /webcontent
+/dev/vdb                5.0G   33M  5.0G   1% /webcontent
 # 
 
 # yum install -y nfs-utils
+# systemctl enable nfs   // 부팅시 서비스 시작
 # systemctl start nfs   // nfs 서비스 시작
 
 
 # vi /etc/exports
+/webcontent     192.168.123.0/24(rw,no_root_squash,sync)       // squash 정책의 기본 설정은 nfs 클라이언트들의 모든 접근은 nfsnobody로 인식하여 권한에 한계가 발생. 해당 권한 문제를 해결하기 위해서는 'no_root_squash' 옵션으로 root 계정의 접근은 root로 인식(no_all_squash : 모든 클라이언트의 계정 인식)
+
+:wq!
+
 # exportfs -rva
 exporting 192.168.124.0/24:/webcontent
 # 
@@ -364,16 +342,15 @@ o- luns ........................................................................
 Global pref auto_save_on_exit=true
 Last 10 configs saved in /etc/target/backup/.
 Configuration saved to /etc/target/saveconfig.json
-[root@storage ~]# systemctl enable target
+# systemctl enable target
 Created symlink from /etc/systemd/system/multi-user.target.wants/target.service to /usr/lib/systemd/system/target.service.
-[root@storage ~]# systemctl start target
+# systemctl start target
 
 ```
 
 
 * Database 서버에서 ISCSI 서비스 연결
 ```
-iscsi 마운트
 # yum install iscsi*
 Loaded plugins: fastestmirror
 Loading mirror speeds from cached hostfile
@@ -427,15 +404,14 @@ Installed:
 
 Complete!        
 # vi /etc/iscsi/initiatorname.iscsi 
-[root@database ~]# systemctl enable iscsi
-[root@database ~]# systemctl start iscsi
-[root@database ~]# iscsiadm -m iscsiadm -m discovery -t sendtargets -p 192.168.124.30
+# systemctl enable iscsi
+# systemctl start iscsi
+# iscsiadm -m iscsiadm -m discovery -t sendtargets -p 192.168.124.30
 192.168.124.30:3260,1 iqn.2020-06.com.example:storage
-[root@database ~]# iscsiadm -m node -T "iqn.2020-06.com.example:storage" -p 192.168.124.30:3260 -l
-
+# iscsiadm -m node -T "iqn.2020-06.com.example:storage" -p 192.168.124.30:3260 -l
 Logging in to [iface: default, target: iqn.2020-06.com.example:storage, portal: 192.168.124.30,3260] (multiple)
 Login to [iface: default, target: iqn.2020-06.com.example:storage, portal: 192.168.124.30,3260] successful.
-[root@database ~]# lsblk
+# lsblk
 NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
 sda               8:0    0    5G  0 disk 
 sr0              11:0    1  4.5G  0 rom  
@@ -444,19 +420,14 @@ vda             252:0    0   20G  0 disk
 └─vda2          252:2    0   19G  0 part 
   ├─centos-root 253:0    0   17G  0 lvm  /
   └─centos-swap 253:1    0    2G  0 lvm  [SWAP]
-[root@database ~]# iscsiadm -m node -T "iqn.2020-06.com.example:storage" -p 192.168.124.30:3260 -l^C
-[root@database ~]# 
-
-[root@database ~]# pvcreate /dev/sda
+# iscsiadm -m node -T "iqn.2020-06.com.example:storage" -p 192.168.124.30:3260 -l^C
+# pvcreate /dev/sda
   Physical volume "/dev/sda" successfully created.
-[root@database ~]# vgcreate vg_db /dev/sda
+# vgcreate vg_db /dev/sda
   Volume group "vg_db" successfully created
-[root@database ~]# lvcreate lv_db -l 100%FREE vg_db
-  Volume group "lv_db" not found
-  Cannot process volume group lv_db
-[root@database ~]# lvcreate -n lv_db -l 100%FREE vg_db
+# lvcreate -n lv_db -l 100%FREE vg_db
   Logical volume "lv_db" created.
-[root@database ~]# lsblk
+ lsblk
 NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
 sda               8:0    0    5G  0 disk 
 └─vg_db-lv_db   253:2    0    5G  0 lvm  
@@ -466,7 +437,6 @@ vda             252:0    0   20G  0 disk
 └─vda2          252:2    0   19G  0 part 
   ├─centos-root 253:0    0   17G  0 lvm  /
   └─centos-swap 253:1    0    2G  0 lvm  [SWAP]
-[root@database ~]# 
 ```
 
 3. database 서버 구축
