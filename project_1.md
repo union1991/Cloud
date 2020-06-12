@@ -598,14 +598,20 @@ http://192.168.123.20/wordpress
 
 
 > * 언어 설정창을 통해 사용하고자 하는 언어 선택
+
+
 <img src="https://user-images.githubusercontent.com/56064985/84471118-a7131c80-acbf-11ea-8bad-1688027a5013.png" width="90%"></img>
 
 
 > * 페이지 및 계정 설정
+
+
 <img src="https://user-images.githubusercontent.com/56064985/84471134-ae3a2a80-acbf-11ea-922c-475045857c14.png" width="90%"></img>
 
 
 > * 완료
+
+
 <img src="https://user-images.githubusercontent.com/56064985/84473374-eba0b700-acc3-11ea-9889-a8c66f5fb3d2.png" width="90%"></img>
 
 
