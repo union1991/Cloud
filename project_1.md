@@ -56,7 +56,17 @@
 
 * Load Balancing
 > * 부하분산 또는 로드 밸런싱(load balancing)은 컴퓨터 네트워크 기술의 일종으로 둘 혹은 셋이상의 중앙처리장치 혹은 저장장치와 같은 컴퓨터 자원들에게 작업을 나누는 것을 의미한다. 이로써 가용성 및 응답시간을 최적화 시킬 수 있다. 
+> * haproxy : Haproxy 는 Load balancer 로 활용할 수 있는 유닉스 계열 패키지이며, 다양한 설정이 가능하고 nginx reverse proxy 에 비해서 active health check가 가능하기 때문에 더 안정적으로 운영할 수 있다
 
+
+* Wordpress
+> * 워드프레스(WordPress)는 오픈 소스 블로그 소프트웨어로는 템플릿 시스템을 사용하여 PHP와 HTML 코드 편집 없이도 테마를 설치해 자유롭게 전환할 수 있다.
+> * wordpress에 필요한 패키지 특이사항
+
+|패키지|버전|특이사항|
+|:---|:---|:---|
+|PHP|7.3 빌드 이상|epel-release 설치|
+|Database|MariaDB 10 빌드 이상|공식 REPO|
 
 ---
 
