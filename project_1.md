@@ -481,7 +481,7 @@ MariaDB [(none)]> flush privileges;   // refresh
 ```
 
 
-4. http 서버 구축(web1, Web2 
+4. http 서버 구축(web1, Web2 동일하게 진행-클론 가능)
 
 * /webcontent@storage 와 /var/www@web1,web2 마운트하기 
 ```
@@ -645,7 +645,7 @@ backend app
 1. 서버에 설치되어 있는 기존 PHP(외 다른 패키지 포함)를 삭제하고, 다른 버전을 PHP 패키지를 설치하려고 할 때 문제 발생한다.
 * 기존에 남아있는 패키지의 잔여 정보 때문에 패키지 설치가 불가능한 것으로, 다음의 옵션을 주어 강제 설치를 진행한다.
 ```
-yum --skip-broken install php php-common php-opcache php-mcrypt php-cli php-gd php-curl php-mysqlnd
+# yum --skip-broken install php php-common php-opcache php-mcrypt php-cli php-gd php-curl php-mysqlnd
 ```
 
 2. 클라이언트 서버에서 iscsi 서비스를 한번 붙이면 지속적으로 로그인이 유지된다. 따라서 헤딩 서비스를 로그아웃하고 싶거나 다시 세션 정보를 받아오는지 확인하고 싶다면 다음의 명령어를 입력한다.
@@ -655,4 +655,20 @@ yum --skip-broken install php php-common php-opcache php-mcrypt php-cli php-gd p
 Logging out of session [sid: 1, target: iqn.2020-06.com.example:storage, portal: 192.168.124.30,3260]
 Logout of [sid: 1, target: iqn.2020-06.com.example:storage, portal: 192.168.124.30,3260] successful.
 # iscsiadm -m node -T "iqn.2020-06.com.example:storage" -p 192.168.124.30:3260 -l  //
+```
+
+3. web서버와 database 서버가 부팅되지 않는 경우가 발생한다.
+* 1 storage 서버가 켜져있지 않은 경우, mount 정보를 읽어오지 못하여 부팅이 안된다. 따라서 storage 서버를 먼저 부팅하고 진행한다.
+* 2 storage의 nfs 또는 iscsci 서비스가 켜져있지 않은 경우, mount 정보를 읽어오지 못하여 부팅이 안된다. 따라서 storage 서버의 다음 명령어를 입력한다.
+```
+# systemctl start nfs
+# systemctl start target
+```
+
+
+* 3 storage 서버가 켜져있지 않은 경우, mount 정보를 읽어오지 못하여 부팅이 안된다. 따라서 storage 서버를 먼저 부팅하고 진행한다.
+
+
+
+
 ```
