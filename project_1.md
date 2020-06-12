@@ -128,10 +128,11 @@
 
 
 ### [SELinux 설정 Disabled]
+```
 # vi /etc/sysconfig/selinux
 
-SELINUX=disabled  // 
-
+SELINUX=disabled  // 부팅 후에도 disabled 상태 유지
+```
 ---
 
 
