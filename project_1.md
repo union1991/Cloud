@@ -408,6 +408,11 @@ Installed:
 
 Complete!        
 # vi /etc/iscsi/initiatorname.iscsi 
+
+InitiatorName=iqn.2020-06.com.example:database
+
+:wq!
+
 # systemctl enable iscsi
 # systemctl start iscsi
 # iscsiadm -m iscsiadm -m discovery -t sendtargets -p 192.168.124.30
