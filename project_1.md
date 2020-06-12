@@ -605,6 +605,11 @@ http://192.168.123.20/wordpress
 <img src="https://user-images.githubusercontent.com/56064985/84471134-ae3a2a80-acbf-11ea-922c-475045857c14.png" width="90%"></img>
 
 
+> * 완료
+<img src="https://user-images.githubusercontent.com/56064985/84473374-eba0b700-acc3-11ea-9889-a8c66f5fb3d2.png" width="90%"></img>
+
+
+
 #### 6. load balance 서버 설정
 
 * haproxy 설치, 설정, 실행
