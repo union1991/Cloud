@@ -1,12 +1,12 @@
 # 과제 1. 웹서비스 환경 구성하기
 
-## 목차.
+## 목차
 
 ### 1. 과제 목표 
 ### 2. 과제 내용 
 ### 3. 환경 설정 
 ### 4. 과제 절차 
-### 5. 추가 정리
+### 5. 추가 정리(FAQ)
 
 
 -----------------
@@ -460,7 +460,12 @@ gpgcheck=1
 
 ...
 
+:wq!
+
 # yum install MariaDB-server MariaDB-client
+# systemctl enable mariadb
+# systemctl start mariadb
+
 
 ```
 
@@ -476,7 +481,7 @@ MariaDB [(none)]> flush privileges;   // refresh
 ```
 
 
-4. http 서버 구축
+4. http 서버 구축(web1, Web2 
 
 * /webcontent@storage 와 /var/www@web1,web2 마운트하기 
 ```
@@ -496,16 +501,15 @@ tmpfs                       184M     0  184M   0% /run/user/0
 192.168.124.30:/webcontent  5.0G   32M  5.0G   1% /var/www
 ```
 
-* httpd 및 워드프레스 패키지 설치
+* httpd 패키지 설치
 ```
 # yum install httpd
 # firewall-cmd --add-service=http --permanent
 success
-# yum install wget
-# wget "http://wordpress.org/latest.tar.gz"
-# tar -xvzf latest.tar.gz -C /var/www/html
-# chown -R apache: /var/www/html/wordpress
-
+# firewall-cmd --reload
+success
+# systemctl enable httpd
+# systemctl start httpd
 ```
 
 * php 설치(php 7.2 이상만 지원 가능)
@@ -518,6 +522,7 @@ success
 
 
 또는
+
 # yum install epel-release yum-utils
 # yum install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
 
@@ -544,13 +549,51 @@ enable = 0   // 설정
 ```
 
 
+5. wordpress 설정(Web1만 진행)
+
+* 워드프레스 패키지 설치
+```
+# yum install wget
+# wget "http://wordpress.org/latest.tar.gz"
+# tar -xvzf latest.tar.gz -C /var/www/html
+# chown -R apache: /var/www/html/wordpress
+
+```
+
+
+* 워드프레스와 데이터베이스 서버 연결
+```
+# cd /var/www/html/wordpress
+# cp ./wp-config-sample.php ./wp-config.php
+# vi ./wp-config.php
+...
+
+// ** MySQL settings - You can get this info from your web host ** //
+/** The name of the database for WordPress */
+define( 'DB_NAME', 'wordpress' );   // wordpress DB 이름 기입
+
+/** MySQL database username */
+define( 'DB_USER', 'wordadmin' );   // wordpress 관리 계정 기입
+
+/** MySQL database password */
+define( 'DB_PASSWORD', 'toor' );   // wordpress 관리 계정 패스워드 기입
+
+/** MySQL hostname */
+define( 'DB_HOST', '192.168.124.40' );   // DB 서버 주소 기입
+
+...
+
+:wq!
+```
+
+* 워드프레스 설정시작
+```
+인터넷 주소창 
+http://192.168.123.20/wordpress 
 
 
 
-
-
-
-
+```
 
 
 6. load balance 서버 설정
@@ -594,28 +637,22 @@ backend app
 
 
 
+### 5. 추가 정리(FAQ)
 
-### [webserver 서버]
 
+ 과제를 진행하면 발생한 예기치 않은 사례들을 정리하였다.
 
-sudo yum install epel-release yum-utils
-sudo yum install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
-sudo yum-config-manager --enable remi-php73
-sudo yum install php php-common php-opcache php-mcrypt php-cli php-gd php-curl php-mysqlnd
-
-yum --skip-broken install
-
+1. 서버에 설치되어 있는 기존 PHP(외 다른 패키지 포함)를 삭제하고, 다른 버전을 PHP 패키지를 설치하려고 할 때 문제 발생한다.
+* 기존에 남아있는 패키지의 잔여 정보 때문에 패키지 설치가 불가능한 것으로, 다음의 옵션을 주어 강제 설치를 진행한다.
+```
+yum --skip-broken install php php-common php-opcache php-mcrypt php-cli php-gd php-curl php-mysqlnd
 ```
 
-
-
+2. 클라이언트 서버에서 iscsi 서비스를 한번 붙이면 지속적으로 로그인이 유지된다. 따라서 헤딩 서비스를 로그아웃하고 싶거나 다시 세션 정보를 받아오는지 확인하고 싶다면 다음의 명령어를 입력한다.
 
 ```
-
-
-
-[root@database ~]# iscsiadm -m node -T "iqn.2020-06.com.example:storage" -p 192.168.124.30:3260 -u
+# iscsiadm -m node -T "iqn.2020-06.com.example:storage" -p 192.168.124.30:3260 -u  // 로그아웃
 Logging out of session [sid: 1, target: iqn.2020-06.com.example:storage, portal: 192.168.124.30,3260]
 Logout of [sid: 1, target: iqn.2020-06.com.example:storage, portal: 192.168.124.30,3260] successful.
-[root@database ~]# iscsiadm -m node -T "iqn.2020-06.com.example:storage" -p 192.168.124.30:3260 -l
+# iscsiadm -m node -T "iqn.2020-06.com.example:storage" -p 192.168.124.30:3260 -l  //
 ```
