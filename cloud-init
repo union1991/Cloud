@@ -30,15 +30,9 @@ runcmd:
  - [chown, -R, apache:, /var/www/html/wordpress]  
  - [systemctl, start, httpd]
  - [systemctl, enable, httpd]
- - [systemctl, start, mysqld]
- - [systemctl, enable, mysqld]
+ - [systemctl, start, mariadb]
+ - [systemctl, enable, mariadb]
  - [firewalld-offline-cmd, --permanent,--add-service=http]
- - [mysql, -u, root, -e,create,database,wordpress,default,CHARACTER,SET,UTF8;]
- - [mysql, -u, root, -e,create,user,'wordadmin'@'%',identified,by,'toor';]
- - [mysql, -u, root, -e,grant,all,privileges,on,wordpress.*,to,wordadmin;]
-
-
-test2
  - [firewalld-offline-cmd, --permanent,--add-service=http]
  - [mysql, -u, root, -e, "create database wordpress default CHARACTER SET UTF8;"]
  - [mysql, -u, root, -e, "create user 'wordadmin'@'%' identified,by 'toor';"]
