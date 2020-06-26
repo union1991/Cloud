@@ -1,0 +1,36 @@
+#cloud-config
+
+yum_repos:
+  # The name of the repository
+  database:
+    # Any repository configuration options
+    # See: man yum.conf
+    #
+    # This one is required!
+    baseurl: http://yum.mariadb.org/10.4/centos7-amd64
+    enabled: 1
+    failovermethod: priority
+    gpgcheck: true
+    gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+    name: database  
+    
+runcmd:
+ - [yum, clean, all]
+ - [yum, repolist, update] 
+ - [yum, -y, install,epel-release ]
+ - [rpm, -Uvh, "https://mirror.webtatic.com/yum/el7/webtatic-release.rpm"]
+ - [yum, -y, install, httpd ]
+ - [yum, -y, install, wget ]
+ - [yum, -y, install,php72w-cli, php72w-bcmath, php72w-gd, php72w-mbstring, php72w-mysqlnd, php72w-pear, php72w-xml, php72w-xmlrpc, php72w-process, mod_php72w]
+ - [wget,-p,/root/, "http://wordpress.org/latest.tar.gz"]
+ - [tar, -xvzf, /wordpress.org/latest.tar.gz, -C, /var/www/html]
+ - [rm, -rf, wordpress.org]
+ - [chown, -R, apache:, /var/www/html/wordpress]  
+ - [systemctl, start, httpd]
+ - [systemctl, enable, httpd]
+ - [systemctl, start, mysqld]
+ - [systemctl, enable, mysqld]
+ - [firewalld-offline-cmd, --permanent,--add-service=http]
+ - [mysql, -u, root, -e,create,database,wordpress,default,CHARACTER,SET,UTF8;]
+ - [mysql, -u, root, -e,create,user,'wordadmin'@'%',identified,by,'toor';]
+ - [mysql, -u, root, -e,grant,all,privileges,on,wordpress.*,to,wordadmin;]
