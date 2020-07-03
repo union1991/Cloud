@@ -1,3 +1,4 @@
+#cloud-config
 yum_repos:
   # The name of the repository
   database:
