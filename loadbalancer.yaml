@@ -1,0 +1,96 @@
+description: version 2017-09-01 created by HOT Generator at Mon, 06 Jul 2020 08:20:21
+  GMT.
+heat_template_version: '2015-04-30'
+
+parameters:
+  f1: 
+    type: string
+  f2: 
+    type: string
+
+resources:
+
+  Net_1:
+    properties: {admin_state_up: true, name: private}
+    type: OS::Neutron::Net
+
+  RouterInterface_1:
+    properties:
+      router: fcea3579-e362-478d-89cb-e230a776d563
+      subnet: {get_resource: Subnet_1}
+    type: OS::Neutron::RouterInterface
+
+  Server_1:
+    properties:
+      availability_zone: nova
+      flavor: flavor1
+      image: 3e40abe2-b57a-4b0f-b615-f9337092a6b9
+      key_name: key3
+      name: web2
+      networks:
+      - network: {get_resource: Net_1}
+      security_groups: [41136d5e-3924-4fd0-aaa3-c516098f51e1]
+    type: OS::Nova::Server
+
+  Server_2:
+    properties:
+      availability_zone: nova
+      flavor: flavor1
+      image: 3e40abe2-b57a-4b0f-b615-f9337092a6b9
+      key_name: key3
+      name: web1
+      networks:
+      - network: {get_resource: Net_1}
+      security_groups: [41136d5e-3924-4fd0-aaa3-c516098f51e1]
+    type: OS::Nova::Server
+ 
+  Subnet_1:
+    properties:
+      cidr: 172.16.3.0/24
+      dns_nameservers: [8.8.8.8]
+      enable_dhcp: true
+      ip_version: 4
+      name: subnet-priv
+      network: {get_resource: Net_1}
+    type: OS::Neutron::Subnet
+  
+  loadbalance_1:
+    properties:
+    type: OS::Neutron::LBaaS::LoadBalancer
+    properties:
+      name: {get_param: f1}
+      vip_subnet: {get_resource: Subnet_1}
+
+  listener_1:
+    type: OS::Neutron::LBaaS::Listener
+    properties:
+      name: {get_param: f2}
+      protocol: HTTP
+      protocol_port: 80
+      loadbalancer: {get_resource: loadbalance_1}
+
+  pool_1:
+    type: OS::Neutron::LBaaS::Pool
+    properties:
+      name: pool_1
+      lb_algorithm: ROUND_ROBIN
+      listener: {get_resource: listener_1}
+      protocol: HTTP
+
+  healthMon_1:
+    type: OS::Neutron::LBaaS::HealthMonitor
+    properties:
+      delay: 5
+      max_retries: 4
+      timeout: 10
+      type: HTTP
+      pool: {get_resource: pool_1}
+
+  poolM_1:
+    type: OS::Neutron::LBaaS::PoolMember
+    properties:
+      subnet: {get_resource: Subnet_1}
+      address: { get_attr: [Server_1, first_address]}
+      protocol_port: 80
+      pool: {get_resource: pool_1}
+
