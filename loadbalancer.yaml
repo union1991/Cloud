@@ -16,34 +16,59 @@ resources:
 
   RouterInterface_1:
     properties:
-      router: fcea3579-e362-478d-89cb-e230a776d563
+      router: router1
       subnet: {get_resource: Subnet_1}
     type: OS::Neutron::RouterInterface
 
+  Port_1: 
+    type: OS::Neutron::Port
+    properties: 
+      admin_state_up: true
+      fixed_ips: 
+        - subnet: { get_resource: Subnet_1 }
+      network: { get_resource: Net_1 }
+      name: port_test1
+      
+  FloatingIP_1: 
+    type: OS::Neutron::FloatingIP
+    properties: 
+      port_id: { get_attr: [ loadbalance_1, vip_port_id ] }
+      floating_network: 99dd06d7-d55e-4584-9c50-3e77b96e95ef
+
   Server_1:
+    type: OS::Nova::Server
     properties:
+      security_groups: [5a763b15-cc05-4412-a8f1-13e1f698dc30]
       availability_zone: nova
       flavor: flavor1
-      image: 3e40abe2-b57a-4b0f-b615-f9337092a6b9
+      image: Centos7
       key_name: key3
       name: web2
       networks:
       - network: {get_resource: Net_1}
-      security_groups: [41136d5e-3924-4fd0-aaa3-c516098f51e1]
-    type: OS::Nova::Server
+      user_data: |
+        #!/bin/bash
+        yum -y install httpd
+        systemctl start httpd
+        systemctl enable httpd
 
   Server_2:
+    type: OS::Nova::Server
     properties:
+      security_groups: [5a763b15-cc05-4412-a8f1-13e1f698dc30]
       availability_zone: nova
       flavor: flavor1
-      image: 3e40abe2-b57a-4b0f-b615-f9337092a6b9
+      image: Centos7
       key_name: key3
       name: web1
       networks:
       - network: {get_resource: Net_1}
-      security_groups: [41136d5e-3924-4fd0-aaa3-c516098f51e1]
-    type: OS::Nova::Server
- 
+      user_data: |
+        #!/bin/bash
+        yum -y install httpd
+        systemctl start httpd
+        systemctl enable httpd
+
   Subnet_1:
     properties:
       cidr: 172.16.3.0/24
@@ -58,7 +83,7 @@ resources:
     properties:
     type: OS::Neutron::LBaaS::LoadBalancer
     properties:
-      name: {get_param: lbname}
+      name: {get_param: listename}
       vip_subnet: {get_resource: Subnet_1}
 
   listener_1:
@@ -91,5 +116,13 @@ resources:
     properties:
       subnet: {get_resource: Subnet_1}
       address: { get_attr: [Server_1, first_address]}
+      protocol_port: 80
+      pool: {get_resource: pool_1}
+
+  poolM_2:
+    type: OS::Neutron::LBaaS::PoolMember
+    properties:
+      subnet: {get_resource: Subnet_1}
+      address: { get_attr: [Server_2, first_address]}
       protocol_port: 80
       pool: {get_resource: pool_1}
