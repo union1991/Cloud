@@ -3,9 +3,9 @@ description: version 2017-09-01 created by HOT Generator at Mon, 06 Jul 2020 08:
 heat_template_version: '2015-04-30'
 
 parameters:
-  f1: 
+  lbname: 
     type: string
-  f2: 
+  listename: 
     type: string
 
 resources:
@@ -58,13 +58,13 @@ resources:
     properties:
     type: OS::Neutron::LBaaS::LoadBalancer
     properties:
-      name: {get_param: f1}
+      name: {get_param: lbname}
       vip_subnet: {get_resource: Subnet_1}
 
   listener_1:
     type: OS::Neutron::LBaaS::Listener
     properties:
-      name: {get_param: f2}
+      name: {get_param: listename}
       protocol: HTTP
       protocol_port: 80
       loadbalancer: {get_resource: loadbalance_1}
@@ -93,4 +93,3 @@ resources:
       address: { get_attr: [Server_1, first_address]}
       protocol_port: 80
       pool: {get_resource: pool_1}
-
