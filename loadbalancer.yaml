@@ -24,6 +24,7 @@ resources:
     type: OS::Neutron::Port
     properties: 
       admin_state_up: true
+      security_groups: [5a763b15-cc05-4412-a8f1-13e1f698dc30]
       fixed_ips: 
         - subnet: { get_resource: Subnet_1 }
       network: { get_resource: Net_1 }
@@ -38,7 +39,6 @@ resources:
   Server_1:
     type: OS::Nova::Server
     properties:
-      security_groups: [5a763b15-cc05-4412-a8f1-13e1f698dc30]
       availability_zone: nova
       flavor: flavor1
       image: Centos7
@@ -55,7 +55,6 @@ resources:
   Server_2:
     type: OS::Nova::Server
     properties:
-      security_groups: [5a763b15-cc05-4412-a8f1-13e1f698dc30]
       availability_zone: nova
       flavor: flavor1
       image: Centos7
@@ -108,7 +107,7 @@ resources:
       delay: 5
       max_retries: 4
       timeout: 10
-      type: HTTP
+      type: PING
       pool: {get_resource: pool_1}
 
   poolM_1:
