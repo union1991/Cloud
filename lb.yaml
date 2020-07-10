@@ -1,0 +1,142 @@
+description: version 2017-09-01 created by HOT Generator at Mon, 06 Jul 2020 08:20:21
+  GMT.
+heat_template_version: '2015-04-30'
+
+parameters:
+  lbname:
+    type: string
+  listename:
+    type: string
+  rname:
+    type: string
+  kname:
+    type: string
+  iname:
+    type: string
+  fname:
+    type: string
+  servsecu:
+    type: string
+  portsecu:
+    type: string
+  FNet:
+    type: string
+
+resources:
+  Net_1:
+    properties: {admin_state_up: true, name: private}
+    type: OS::Neutron::Net
+
+  RouterInterface_1:
+    properties:
+      router: {get_param: rname }
+      subnet: {get_resource: Subnet_1}
+    type: OS::Neutron::RouterInterface
+
+  Port_1:
+    type: OS::Neutron::Port
+    properties:
+      admin_state_up: true
+      security_groups: [{get_param: portsecu}]
+      fixed_ips:
+        - subnet: { get_resource: Subnet_1 }
+      network: { get_resource: Net_1 }
+      name: port_test1
+
+  FloatingIP_1:
+    type: OS::Neutron::FloatingIP
+    properties:
+      port_id: { get_attr: [ loadbalance_1, vip_port_id ] }
+      floating_network: {get_param: FNet}
+
+  Server_1:
+    type: OS::Nova::Server
+    properties:
+      availability_zone: nova
+      security_groups: [{get_param: servsecu}]
+      flavor: {get_param: fname}
+      image: {get_param: iname}
+      key_name: {get_param: kname}
+      name: web2
+      networks:
+      - network: {get_resource: Net_1}
+      user_data: |
+        #!/bin/bash
+        yum -y install httpd
+        systemctl start httpd
+        systemctl enable httpd
+
+  Server_2:
+    type: OS::Nova::Server
+    properties:
+      availability_zone: nova
+      security_groups: [{get_param: servsecu}]
+      flavor: {get_param: fname}
+      image: {get_param: iname}
+      key_name: {get_param: kname}
+      name: web1
+      networks:
+      - network: {get_resource: Net_1}
+      user_data: |
+        #!/bin/bash
+        yum -y install httpd
+        systemctl start httpd
+        systemctl enable httpd
+
+  Subnet_1:
+    properties:
+      cidr: 172.16.3.0/24
+      dns_nameservers: [8.8.8.8]
+      enable_dhcp: true
+      ip_version: 4
+      name: subnet-priv
+      network: {get_resource: Net_1}
+    type: OS::Neutron::Subnet
+
+  loadbalance_1:
+    properties:
+    type: OS::Neutron::LBaaS::LoadBalancer
+    properties:
+      name: {get_param: listename}
+      vip_subnet: {get_resource: Subnet_1}
+
+  listener_1:
+    type: OS::Neutron::LBaaS::Listener
+    properties:
+      name: {get_param: listename}
+      protocol: HTTP
+      protocol_port: 80
+      loadbalancer: {get_resource: loadbalance_1}
+
+  pool_1:
+    type: OS::Neutron::LBaaS::Pool
+    properties:
+      name: pool_1
+      lb_algorithm: ROUND_ROBIN
+      listener: {get_resource: listener_1}
+      protocol: HTTP
+
+  healthMon_1:
+    type: OS::Neutron::LBaaS::HealthMonitor
+    properties:
+      delay: 5
+      max_retries: 4
+      timeout: 10
+      type: PING
+      pool: {get_resource: pool_1}
+
+  poolM_1:
+    type: OS::Neutron::LBaaS::PoolMember
+    properties:
+      subnet: {get_resource: Subnet_1}
+      address: { get_attr: [Server_1, first_address]}
+      protocol_port: 80
+      pool: {get_resource: pool_1}
+
+  poolM_2:
+    type: OS::Neutron::LBaaS::PoolMember
+    properties:
+      subnet: {get_resource: Subnet_1}
+      address: { get_attr: [Server_2, first_address]}
+      protocol_port: 80
+      pool: {get_resource: pool_1}
