@@ -72,7 +72,7 @@ write_files:
       define( 'DB_PASSWORD', 'toor' );
 
       /** MySQL hostname */
-      define( 'DB_HOST', '172.16.0.17' );
+      define( 'DB_HOST', 'localhost' );
 
       /** Database Charset to use in creating database tables. */
       define( 'DB_CHARSET', 'utf8mb4' );
@@ -89,14 +89,14 @@ write_files:
 
        * @since 2.6.0
       */
-      define( 'AUTH_KEY',         'GEt:=g,j~qG>U`_VKO8k77o`=QKSJ_n(2t[_&i*s2XF54_<d*R/5*Z`p^0rGl{. ' );
-      define( 'SECURE_AUTH_KEY',  'ise@4$C`,/&kuQJt$G~IRZHhGghC30</k8m&FLl([bO~#I5[6@aC3quK(i}2*>A#' );
-      define( 'LOGGED_IN_KEY',    '4rHI5{C%BW95]Bx{&W0_]Om4b([8>S~Csp)7)qX}&n*|7^,@L{bdI$HoZDql!d&s' );
-      define( 'NONCE_KEY',        'T]$V1V$[FX[H;PVnh,>.62rAu7:=vF)X37XD9h7605{Kp4s}!kT=/FP@lZ0Ke( d' );
-      define( 'AUTH_SALT',        'l*51lm?[+m8t$yaFRP^z#0][X rc$!:=6z[r4)1tzE8y,2=tS|QGF_Ou>!SFJa76' );
-      define( 'SECURE_AUTH_SALT', 'CO0h}DWAJb!;lH4yOF3>mZ5.QGnI{Vn+kt[B[wGRBp<RwaG0PBw8igQ=BaA?gJs>' );
-      define( 'LOGGED_IN_SALT',   '@Fx_3i|hu^Ko%D)9go0|)djt3Dtz?00WbY3mct4~vQ4a;0Z%1~uRoZ9m{BNKbHAg' );
-      define( 'NONCE_SALT',       'Rkt.]!-K?QJR*%O;UUO$)2HR2Gj$ Hw%izj2;FHJ0Y9qucayS0(~nS7A]FtcRh=q' );
+      define( 'AUTH_KEY',         'put your unique phrase here' );
+      define( 'SECURE_AUTH_KEY',  'put your unique phrase here' );
+      define( 'LOGGED_IN_KEY',    'put your unique phrase here' );
+      define( 'NONCE_KEY',        'put your unique phrase here' );
+      define( 'AUTH_SALT',        'put your unique phrase here' );
+      define( 'SECURE_AUTH_SALT', 'put your unique phrase here' );
+      define( 'LOGGED_IN_SALT',   'put your unique phrase here' );
+      define( 'NONCE_SALT',       'put your unique phrase here' );
 
       /**#@-*/
 
