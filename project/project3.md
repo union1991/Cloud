@@ -91,7 +91,7 @@ spec:
 
 > * MySQL PV 및 PVC 배포
 ```
-# kubectl create -f mysql-pv.yaml
+# kubectl create -f wordpress-pv.yaml 
 ```
 
 
@@ -192,6 +192,10 @@ spec:
     app: mysql 
 ```
 
+> * MySQL 서비스 배포
+```
+# kubectl create -f mysql-service.yaml
+```
 
 ---
 
