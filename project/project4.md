@@ -8,28 +8,46 @@ Day 00.
 
 ## 1. 프로젝트 개요
 
-> ### 1.1 
+> ### 1.1 목적
+> ### 1.2 환경설정
 
 ## 2. 프로젝트 내용
 
-> ### 2.1 
+> ### 2.1 구성도
+> ### 2.2 서비스
 
-## 3. 프로젝트 환경설정
+## 3. 프로젝트 구현
 
 > ### 3.1
 
-## 4. 프로젝트 구현
+## 4. FAQ
 
 > ### 4.1
-
-## 5. FAQ
-
-> ### 5.1
 ------------
  
 ## 1. 프로젝트 개요
 
-### 1.1 
+### 1.1 목적
+
+
+ 본 과제의 목적은 쿠버네티스를 사용하여 2티어(Wordpress - DB)환경을 구성하고, 각 기능 구현에 사용되는 쿠버네티스 서비스를 활용하며 쿠버네티스에 대한 전반적인 시스템을 이해하는 것에 있다.
+ 
+ 
+ ### 1.2 환경설정
+ 
+ 
+ 본 과제의 환경설정은 다음과 같다.
+ 
+ 
+ #### [서버]
+ * kube-master 서버
+ * kube-node1 서버
+ * kube-node2 서버
+ * kube-node3 서버
+ 
+ #### [네트워크]
+ 
+
 
 ---
 
@@ -63,28 +81,28 @@ Day 00.
 ```
 
 ```
-3. Deployment: Wordpress(Replica:2, Liveness, Readiness)
+#### Deployment: Wordpress(Replica:2, Liveness, Readiness)
 
 
-4. PVC: StorageClass(cephfs)
+#### PVC: StorageClass(cephfs)
 
 
-5. HPA: Deployment
+#### HPA: Deployment
 
 
-6. Service: Headless
+#### Service: Headless
 
 
-7. Statefulset: Mysql(Replica:2, Liveness, Readiness)
+#### Statefulset: Mysql(Replica:2, Liveness, Readiness)
 
 
-8. PVC: StorageClass(rbd)
+#### PVC: StorageClass(rbd)
 
 
-9. HPA: Statefulset
+#### HPA: Statefulset
 
 
-10. PodAffinity 및  PodAntiAffinity (wp/db <-> wp/db)
+#### PodAffinity 및  PodAntiAffinity (wp/db <-> wp/db)
 
 
 11. (기타) ConfigMap, Secret 등...
