@@ -241,7 +241,7 @@ P@ssw0rd
 
 
 |Resource|Minimum|Recommended|
-|: |: |: |
+|:---|:---|:---|
 |CPU|2CPU|4CPU|
 |Memory|4GB|8GB|
 |Disk|40GB|160GB|
