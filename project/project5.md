@@ -237,6 +237,9 @@ P@ssw0rd
 
 
 * 사전 요구사항
+
+
+
 |Resource|Minimum|Recommended|
 |: |: |: |
 |CPU|2CPU|4CPU|
