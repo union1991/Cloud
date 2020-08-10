@@ -1,0 +1,91 @@
+---
+    - hosts: web
+      tasks:
+      - name: Install nfs-utils
+        yum:
+          name: nfs-utils
+          state: installed
+      - name: Start service nfs-server
+        service:
+          name: nfs-server
+          state: started
+      - name: Wget Install
+        yum: 
+          name: wget
+          state: installed
+      - name: httpd Install
+        yum: 
+          name: httpd
+          state: installed
+      - name: Create Wordpress directory
+        file:
+          path: /var/www/html/wordpress
+          state: directory
+          mode: '777'
+      - name: Mount nfs
+        mount:
+          path: /var/www/html/wordpress
+          src: 192.168.123.53:/webcontent
+          fstype: nfs
+          opts: defaults
+          state: mounted
+      - name: php-epel-release
+        yum:
+          name: epel-release
+          state: present
+      - name: php-release
+        yum:
+          name: https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+          state: present
+      - name: php Install
+        yum:
+          name: php,php-mysql 
+          enablerepo: remi-php74 
+          state: present
+      - name: Firewall for httpd
+        firewalld:
+          port: 80/tcp
+          permanent: yes
+          immediate: yes
+          state: enabled
+      - name: Seboolean Install
+        yum:
+          name: libsemanage-python
+          state: present
+      - name: Set httpd_can_network_connect flag on and keep it persistent across reboots
+        seboolean:
+          name: httpd_can_network_connect
+          state: yes
+          persistent: yes
+      - name: httpd service
+        service: 
+          name: httpd
+          state: restarted
+          enabled: true
+    - hosts: web1
+      tasks:
+      - name: Wordpress Config Copy
+        copy:
+          src: /var/www/html/wordpress/wp-config-sample.php
+          dest: /var/www/html/wordpress/wp-config.php
+          remote_src: yes
+      - name: Wordpress Configure database
+        replace:
+          path: /var/www/html/wordpress/wp-config.php
+          regexp: 'database_name_here'
+          replace: 'wordpress'
+      - name: Wordpress Configuration User
+        replace:
+          path: /var/www/html/wordpress/wp-config.php
+          regexp: 'username_here'
+          replace: 'wordadmin'
+      - name: Wordpress Configuration passwd 
+        replace:
+          path: /var/www/html/wordpress/wp-config.php
+          regexp: 'password_here'
+          replace: '12345'
+      - name: Wordpress Configuration Host
+        replace:
+          path: /var/www/html/wordpress/wp-config.php
+          regexp: 'localhost'
+          replace: '192.168.123.53'
