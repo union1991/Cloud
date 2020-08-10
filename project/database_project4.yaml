@@ -1,0 +1,123 @@
+---
+    - hosts: db
+      become: yes
+      tasks:
+      - name: Install nfs-utils
+        yum:
+          name: nfs-utils
+          state: installed
+      - name: Create share directory
+        file:
+          path: /webcontent
+          state: directory
+          mode: '777'
+      - name: Add line exports
+        lineinfile:
+          path: /etc/exports
+          line: /webcontent     192.168.123.0/24(rw,no_root_squash,sync)
+      - name: Start service nfs-server
+        service:
+          name: nfs-server
+          state: started
+      - name: Open nfs
+        firewalld:
+          service: nfs
+          permanent: yes
+          state: enabled
+      - name: Open rpc-bind
+        firewalld:
+          service: rpc-bind
+          permanent: yes
+          state: enabled
+          immediate: yes
+      - name: Open mountd
+        firewalld:
+          service: mountd
+          permanent: yes
+          immediate: yes
+          state: enabled
+      - name: Create filesystem on /dev/vdb
+        filesystem:
+          fstype: ext4
+          dev: /dev/vdb
+      - name: Mount share directory /dev/vdb
+        mount:
+          path: /var/lib/mysql
+          src: /dev/vdb
+          fstype: ext4
+          opts: defaults
+          state: mounted
+      - name: Wget Install
+        yum: 
+          name: wget
+          state: installed
+      - name: httpd Install
+        yum: 
+          name: httpd
+          state: installed
+      - name: Wordpress Package
+        get_url:
+          url: http://wordpress.org/latest.tar.gz
+          dest: /tmp/
+      - name: Unzip WordPack
+        unarchive:
+          src: /tmp/wordpress-5.4.2.tar.gz
+          dest: /webcontent
+          remote_src: yes
+      - name: Chown
+        file:
+          dest: /webcontent/wordpress 
+          owner: apache
+          group: apache
+      - name: Mysql-repository
+        yum_repository: 
+          name: MariaDB
+          description: MariaDB
+          gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB 
+          gpgcheck: 1 
+          baseurl: http://yum.mariadb.org/10.4/centos7-amd64
+      - name: MariaDB Install
+        yum:
+          name: MariaDB-server
+          state: present
+      - name: Modify service Interface
+        lineinfile:
+          line: bind-address=192.168.123.53
+          insertafter: mysqld
+          path: /etc/my.cnf.d/server.cnf
+      - name: MariaDB for Python
+        yum:
+          name: MySQL-python
+          state: present
+      - name: MariaDB service
+        service: 
+          name: mariadb
+          state: started
+          enabled: true
+      - name: MariaDB DB Create
+        mysql_db:
+          name: wordpress
+          state: present
+      - name: MariaDB useradd
+        mysql_user:
+          name: wordadmin
+          password: 12345
+          priv: '*.*:ALL,GRANT'
+          host: '192.168.%.%'
+          append_privs: 'yes'
+      - name: Firewall for mariadb
+        firewalld:
+          port: 3306/tcp
+          permanent: yes
+          immediate: yes
+          state: enabled
+      - name: Seboolean Install
+        yum:
+          name: libsemanage-python
+          state: present
+      - name: Set Mariadb Connect
+        seboolean:
+          name: httpd_can_network_connect_db
+          state: yes
+          persistent: yes    
+      
