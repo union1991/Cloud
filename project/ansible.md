@@ -123,8 +123,22 @@
 ```
 
 
-```변수 파일```
+```변수 파일``` 변수를 비공개로 유지하면서 플레이북 소스를 공개할 수 있는 방법으로 특정 정보를 메인 플레이북과 다른 파일에 보관할 수 있다.
 
+
+* 변수파일 예시
+```
+---
+- host: web_servers
+  remote_user: root
+  vars:
+    favcolor: blue
+  vars_files:
+  - /vars/external_vars.yml
+  tasks:
+  - name: this is just a placeholder
+    command: /bin/echo foo
+```
 
 
 
