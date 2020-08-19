@@ -904,6 +904,198 @@ backend {{ haproxy['backend']['name'] }}
 ```
 
 
+#### roles/nfs/handlers/main.yml
+```
+---
+- name: Re-export all directories
+  command: exportfs -ar
+```
+
+
+#### roles/nfs/tasks/main.yml
+```
+---
+- name: Install nfs-utils
+  yum:
+    name: nfs-utils
+    state: latest
+- name: Create a directory for nfs exports
+  file:
+    path: "{{ nfs['exports']['directory'] }}"
+    state: directory
+    mode: '0775'
+- block:
+  - name: Create a new primary partition for LVM
+    parted:
+      device: "{{ nfs['block']['device'] }}"
+      number: 1
+      flags: [ lvm ]
+      state: present
+      part_start: 5GiB
+  - name: Create a filesystem
+    filesystem:
+      fstype: "{{ nfs['block']['fs_type'] }}"
+      dev: "{{ nfs['block']['device'] }}1"
+  - name: mount /dev/vdb1 on /wordpress
+    mount:
+      path: "{{ nfs['exports']['directory'] }}"
+      src: "{{ nfs['block']['device'] }}1"
+      fstype: "{{ nfs['block']['fs_type'] }}"
+      state: mounted
+  when: nfs['block']['device'] is defined
+- name: Create exports to webserver
+  template:
+    src: exports.j2
+    dest: /etc/exports
+  notify:
+  - Re-export all directories
+- name: Set wordpress url
+  set_fact:
+    wp_url: "https://ko.wordpress.org/wordpress-{{ wordpress['source']['version'] }}-{{ wordpress['source']['language'] }}.tar.gz"
+    wp_filename: "wordpress-{{ wordpress['source']['version'] }}-{{ wordpress['source']['language'] }}.tar.gz"
+- name: Download wordpress sources
+  get_url: 
+    url: "{{ wp_url }}"
+    dest: "/tmp/{{ wp_filename }}"
+- name: Unarchive wordpress archive
+  unarchive: 
+    src: "/tmp/{{ wp_filename }}"
+    dest: "{{ nfs['exports']['directory'] }}"
+    remote_src: yes 
+    owner: root 
+    group: root
+- name: Copy wp-config.php
+  template:
+    src: wp-config.php.j2
+    dest: "{{ nfs['exports']['directory'] }}/wordpress/wp-config.php"
+- name: Start nfs service
+  service:
+    name: nfs
+    enabled: true
+    state: started
+- name: Allow port for nfs, rpc-bind, mountd
+  firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  with_items: "{{ firewall_nfs_lists }}"
+```
+
+
+#### roles/nfs/templates/exports.j2
+```
+{{ nfs['exports']['directory'] }} {{ nfs['exports']['subnet'] }}({{ nfs['exports']['options'] }})
+```
+
+
+#### roles/nfs/templates/wp-config.php.j2
+```
+<?php
+/**
+ * The base configuration for WordPress
+ *
+ * The wp-config.php creation script uses this file during the
+ * installation. You don't have to use the web site, you can
+ * copy this file to "wp-config.php" and fill in the values.
+ *
+ * This file contains the following configurations:
+ *
+ * * MySQL settings
+ * * Secret keys
+ * * Database table prefix
+ * * ABSPATH
+ *
+ * @link https://wordpress.org/support/article/editing-wp-config-php/
+ *
+ * @package WordPress
+ */
+
+// ** MySQL settings - You can get this info from your web host ** //
+/** The name of the database for WordPress */
+define( 'DB_NAME', '{{ wordpress['db']['name'] }}' );
+
+/** MySQL database username */
+define( 'DB_USER', '{{ wordpress['db']['username'] }}' );
+
+/** MySQL database password */
+define( 'DB_PASSWORD', '{{ wordpress['db']['password'] }}' );
+
+/** MySQL hostname */
+define( 'DB_HOST', '{{ wordpress['db']['host'] }}' );
+
+/** Database Charset to use in creating database tables. */
+define( 'DB_CHARSET', 'utf8' );
+
+/** The Database Collate type. Don't change this if in doubt. */
+define( 'DB_COLLATE', '' );
+
+/**#@+
+ * Authentication Unique Keys and Salts.
+ *
+ * Change these to different unique phrases!
+ * You can generate these using the {@link https://api.wordpress.org/secret-key/1.1/salt/ WordPress.org secret-key service}
+ * You can change these at any point in time to invalidate all existing cookies. This will force all users to have to log in again.
+ *
+ * @since 2.6.0
+ */
+define( 'AUTH_KEY',         'put your unique phrase here' );
+define( 'SECURE_AUTH_KEY',  'put your unique phrase here' );
+define( 'LOGGED_IN_KEY',    'put your unique phrase here' );
+define( 'NONCE_KEY',        'put your unique phrase here' );
+define( 'AUTH_SALT',        'put your unique phrase here' );
+define( 'SECURE_AUTH_SALT', 'put your unique phrase here' );
+define( 'LOGGED_IN_SALT',   'put your unique phrase here' );
+define( 'NONCE_SALT',       'put your unique phrase here' );
+
+/**#@-*/
+
+/**
+ * WordPress Database Table prefix.
+ *
+ * You can have multiple installations in one database if you give each
+ * a unique prefix. Only numbers, letters, and underscores please!
+ */
+$table_prefix = 'wp_';
+
+/**
+ * For developers: WordPress debugging mode.
+ *
+ * Change this to true to enable the display of notices during development.
+ * It is strongly recommended that plugin and theme developers use WP_DEBUG
+ * in their development environments.
+ *
+ * For information on other constants that can be used for debugging,
+ * visit the documentation.
+ *
+ * @link https://wordpress.org/support/article/debugging-in-wordpress/
+ */
+define( 'WP_DEBUG', false );
+
+/* That's all, stop editing! Happy publishing. */
+
+/** Absolute path to the WordPress directory. */
+if ( ! defined( 'ABSPATH' ) ) {
+	define( 'ABSPATH', __DIR__ . '/' );
+}
+
+/** Sets up WordPress vars and included files. */
+require_once ABSPATH . 'wp-settings.php';
+```
+
+
+#### roles/nfs/vars/main.yaml
+```
+---
+firewall_nfs_lists:
+  - nfs
+  - rpc-bind
+  - mountd
+```
+
+
+
+
 
 
 
