@@ -685,10 +685,119 @@ sebool_httpd_lists:
 
 
 
+#### roles/common/tasks/main.yml
+
+```
+---
+- block:                                  # task를 block 단위로 묶어서 조건절(when)에 부합해야 해당 block 실행
+  - name: Install epel-release
+    yum: 
+      name: epel-release 
+      state: latest
+  - name: Install libsemanage-python for seboolean
+    yum: 
+      name: libsemanage-python 
+      state: latest
+  when: ansible_distribution == 'CentOS'          # OS가 'centos'일 경우 해당 블록 실행
+
+- block:
+  - name: Update apt cache
+    apt:                                          # ubuntu apt 활성화
+      update_cache: yes
+  when: ansible_distribution == 'Ubuntu'          # OS가 'ubuntu'일 경우 해당 블록 실행
+```
 
 
+#### roles/haproxy/handlers/main.yml
+```
+---
+- name: Restart haproxy service
+  service:
+    name: haproxy
+    state: restarted
+```
 
 
+#### roles/haproxy/tasks/main.yml
+* 조건절(when)을 사용하여 해당 OS에 맞게 haproxy 
+```
+---
+- name: Deploy to CentOS
+  block:
+  - name: Install haproxy
+    yum:
+      name: haproxy
+      state: latest
+  - name: Open http port                                                # http Port 방화벽 오픈
+    firewalld: 
+      port: "{{ haproxy['frontend']['port'] }}/tcp" 
+      permanent: yes 
+      state: enabled                                                    # 서버가 부팅되더라도 서비스 자동 실행
+      immediate: yes                                                    # 즉시 반영
+  - name: Active seboolean for httpd                                    # selinux httpd 서비스 제어 Off 
+    seboolean: 
+      name: haproxy_connect_any
+      state: yes 
+      persistent: yes
+  - name: Set facts for haproxy public ip
+    set_fact:
+      haproxy_public_ip: "{{ ansible_eth0.ipv4.address }}"              # haproxy 서비스 외부 주소 지정
+  - name: Delegate collecting facts for wordpress1
+    setup:
+    delegate_to: node2
+  - name: Set facts for wordpress1 private ip
+    set_fact:
+      wordpress1_private_ip: "{{ ansible_eth1.ipv4.address }}"
+  - name: Delegate collecting facts for wordpress2
+    setup:
+    delegate_to: node3
+  - name: Set facts for wordpress2 private ip
+    set_fact:
+      wordpress2_private_ip: "{{ ansible_eth1.ipv4.address }}"
+  - name: Copy haproxy configuration
+    template:
+      src: centos/haproxy.cfg.j2
+      dest: /etc/haproxy/haproxy.cfg
+    notify:
+    - Restart haproxy service
+  when: ansible_distribution == "CentOS"                               # 조건절(when)을 이용하여 타겟 서버가 centos일 경우 해당 block을 실행
+
+- name: Deploy to Ubuntu
+  block:
+  - name: Install haproxy
+    apt:
+      name: haproxy
+      state: latest
+      update_cache: yes
+  - name: Set facts for haproxy public ip
+    set_fact:
+      haproxy_public_ip: "{{ ansible_ens3.ipv4.address }}"
+  - name: Delegate collecting facts for wordpress1
+    setup:
+    delegate_to: node2
+  - name: Set facts for wordpress1 private ip
+    set_fact:
+      wordpress1_private_ip: "{{ ansible_eth1.ipv4.address }}"
+  - name: Delegate collecting facts for wordpress2
+    setup:
+    delegate_to: node3
+  - name: Set facts for wordpress2 private ip
+    set_fact:
+      wordpress2_private_ip: "{{ ansible_eth1.ipv4.address }}"
+  - name: Copy haproxy configuration
+    template:
+      src: ubuntu/haproxy.cfg.j2
+      dest: /etc/haproxy/haproxy.cfg
+    notify:
+    - Restart haproxy service  
+  when: ansible_distribution == "Ubuntu"                               # 조건절(when)을 이용하여 타겟 서버가 Ubuntu일 경우 해당 block을 실행
+
+- name: Start haproxy service
+  service:
+    name: haproxy
+    enabled: true
+    state: started
+```
 
 
 
