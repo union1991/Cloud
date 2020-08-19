@@ -907,8 +907,8 @@ backend {{ haproxy['backend']['name'] }}
 #### roles/nfs/handlers/main.yml
 ```
 ---
-- name: Re-export all directories
-  command: exportfs -ar
+- name: Re-export all directories			 
+  command: exportfs -ar					 # 파일을 다시 읽어들인다		
 ```
 
 
