@@ -792,7 +792,7 @@ sebool_httpd_lists:
     - Restart haproxy service  
   when: ansible_distribution == "Ubuntu"                               # 조건절(when)을 이용하여 타겟 서버가 Ubuntu일 경우 해당 block을 실행
 
-- name: Start haproxy service
+- name: Start haproxy service                                          
   service:
     name: haproxy
     enabled: true
@@ -800,6 +800,107 @@ sebool_httpd_lists:
 ```
 
 
+#### roles/haproxy/templates/centos/haproxy.cfg.j2
+* centos haproxy 서버에서 사용될 haproxy  
+```
+global
+    log         127.0.0.1 local2
+
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+    daemon
+    stats socket /var/lib/haproxy/stats
+defaults
+    mode                    http
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option http-server-close
+    option forwardfor       except 127.0.0.0/8
+    option                  redispatch
+    retries                 3
+    timeout http-request    10s
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          1m
+    timeout server          1m
+    timeout http-keep-alive 10s
+    timeout check           10s
+    maxconn                 3000
+
+frontend  main {{ haproxy_public_ip }}:{{ haproxy['frontend']['port'] }}        # httpd port 지정
+    acl url_static       path_beg       -i /static /images /javascript /stylesheets
+    acl url_static       path_end       -i .jpg .gif .png .css .js
+
+    #use_backend static          if url_static
+    default_backend              {{ haproxy['backend']['name'] }}
+
+backend static
+    balance     roundrobin
+    server      static 127.0.0.1:4331 check
+
+backend {{ haproxy['backend']['name'] }}
+    balance     {{ haproxy['backend']['balance_type'] }}
+    server  web1 {{ wordpress1_private_ip }}:{{ haproxy['backend']['wordpress1']['port'] }} check         # web1 서버 주소
+    server  web2 {{ wordpress2_private_ip }}:{{ haproxy['backend']['wordpress2']['port'] }} check         # web2 서버 주소
+```
+
+
+#### roles/haproxy/templates/ubuntu/haproxy.cfg.j2
+```
+global
+        log /dev/log    local0
+        log /dev/log    local1 notice
+        chroot /var/lib/haproxy
+        stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+        stats timeout 30s
+        user haproxy
+        group haproxy
+        daemon
+
+        # Default SSL material locations
+        ca-base /etc/ssl/certs
+        crt-base /etc/ssl/private
+
+        # Default ciphers to use on SSL-enabled listening sockets.
+        # For more information, see ciphers(1SSL). This list is from:
+        #  https://hynek.me/articles/hardening-your-web-servers-ssl-ciphers/
+        # An alternative list with additional directives can be obtained from
+        #  https://mozilla.github.io/server-side-tls/ssl-config-generator/?server=haproxy
+        ssl-default-bind-ciphers ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS
+        ssl-default-bind-options no-sslv3
+
+defaults
+        log     global
+        mode    http
+        option  httplog
+        option  dontlognull
+        timeout connect 5000
+        timeout client  50000
+        timeout server  50000
+        errorfile 400 /etc/haproxy/errors/400.http
+        errorfile 403 /etc/haproxy/errors/403.http
+        errorfile 408 /etc/haproxy/errors/408.http
+        errorfile 500 /etc/haproxy/errors/500.http
+        errorfile 502 /etc/haproxy/errors/502.http
+        errorfile 503 /etc/haproxy/errors/503.http
+        errorfile 504 /etc/haproxy/errors/504.http
+
+frontend  main {{ haproxy_public_ip }}:{{ haproxy['frontend']['port'] }}
+    acl url_static       path_beg       -i /static /images /javascript /stylesheets
+    acl url_static       path_end       -i .jpg .gif .png .css .js
+
+    #use_backend static          if url_static
+    default_backend              {{ haproxy['backend']['name'] }}
+
+backend {{ haproxy['backend']['name'] }}
+    balance     {{ haproxy['backend']['balance_type'] }}
+    server  web1 {{ wordpress1_private_ip }}:{{ haproxy['backend']['wordpress1']['port'] }} check
+    server  web2 {{ wordpress2_private_ip }}:{{ haproxy['backend']['wordpress2']['port'] }} check
+```
 
 
 ```
