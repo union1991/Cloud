@@ -831,7 +831,7 @@ defaults
     timeout check           10s
     maxconn                 3000
 
-frontend  main {{ haproxy_public_ip }}:{{ haproxy['frontend']['port'] }}        # httpd port 지정
+frontend  main {{ haproxy_public_ip }}:{{ haproxy['frontend']['port'] }}                         # httpd port 지정
     acl url_static       path_beg       -i /static /images /javascript /stylesheets
     acl url_static       path_end       -i .jpg .gif .png .css .js
 
@@ -850,6 +850,7 @@ backend {{ haproxy['backend']['name'] }}
 
 
 #### roles/haproxy/templates/ubuntu/haproxy.cfg.j2
+* ubuntu haproxy 서버에서 사용될 haproxy  
 ```
 global
         log /dev/log    local0
@@ -889,7 +890,7 @@ defaults
         errorfile 503 /etc/haproxy/errors/503.http
         errorfile 504 /etc/haproxy/errors/504.http
 
-frontend  main {{ haproxy_public_ip }}:{{ haproxy['frontend']['port'] }}
+frontend  main {{ haproxy_public_ip }}:{{ haproxy['frontend']['port'] }}                              # httpd port 지정
     acl url_static       path_beg       -i /static /images /javascript /stylesheets
     acl url_static       path_end       -i .jpg .gif .png .css .js
 
@@ -898,9 +899,13 @@ frontend  main {{ haproxy_public_ip }}:{{ haproxy['frontend']['port'] }}
 
 backend {{ haproxy['backend']['name'] }}
     balance     {{ haproxy['backend']['balance_type'] }}
-    server  web1 {{ wordpress1_private_ip }}:{{ haproxy['backend']['wordpress1']['port'] }} check
-    server  web2 {{ wordpress2_private_ip }}:{{ haproxy['backend']['wordpress2']['port'] }} check
+    server  web1 {{ wordpress1_private_ip }}:{{ haproxy['backend']['wordpress1']['port'] }} check        # web1 서버 주소
+    server  web2 {{ wordpress2_private_ip }}:{{ haproxy['backend']['wordpress2']['port'] }} check        # web2 서버 주소
 ```
+
+
+
+
 
 
 ```
